@@ -54,4 +54,11 @@ env.bak/
 
 # Artworks directory to ignore
 artworks/
+*.docx
+app.py
+chat.py
+llm.py
+config.py
 
+chroma_huggingface/
+chroma_huggingface3/
