@@ -60,5 +60,10 @@ chat.py
 llm.py
 config.py
 
-chroma_huggingface/
-chroma_huggingface3/
+chroma_1104/
+chroma_huggingface_1104/
+
+artworks/
+*.py
+*.txt
+
