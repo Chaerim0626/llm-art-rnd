@@ -59,7 +59,6 @@ chat.py
 chroma_1205/
 
 artworks/
-*.py
 *.txt
 *.pdf
 *.docx
