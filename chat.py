@@ -16,7 +16,7 @@ st.set_page_config(page_title="Page Title ")
 st.title('Title : Streamlit Test')
 
 # 모델과 토크나이저 초기화
-model_name = "LGAI-EXAONE/EXAONE-3.0-7.8B-Instruct"
+model_name = "LGAI-EXAONE/EXAONE-3.5-7.8B-Instruct"
 tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
 model = AutoModelForCausalLM.from_pretrained(
     model_name,
