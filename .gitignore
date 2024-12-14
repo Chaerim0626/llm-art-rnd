@@ -1,0 +1,65 @@
+
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Packages
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+parts/
+var/
+sdist/
+wheels/
+*.pyc
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# VSCode & PyCharm project settings
+.vscode/
+.idea/
+
+# MacOS & Linux System Files
+.DS_Store
+*.swp
+
+# Virtual Environment
+venv/
+ENV/
+env/
+.venv/
+env.bak/
+.env
+
+# Artworks directory to ignore
+artworks/
+chat.py
+chroma_1205/
+
+artworks/
+*.py
+*.txt
+*.pdf
+*.docx
