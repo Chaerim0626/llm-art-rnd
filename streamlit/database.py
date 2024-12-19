@@ -3,7 +3,7 @@ from langchain_huggingface import HuggingFaceEmbeddings  # 변경된 임포트
 from langchain_chroma import Chroma  # 변경된 임포트
 import torch  # GPU 정보 확인을 위해 추가
 
-def load_database(persist_directory, collection_name, embeddings):
+def load_database(persist_directory, collection_name):
     """
     데이터베이스를 로드하고, GPU 정보와 문서 개수를 사이드바에 출력.
     - persist_directory: Chroma 데이터베이스의 경로
@@ -20,8 +20,7 @@ def load_database(persist_directory, collection_name, embeddings):
             embedding_function=embeddings,
             collection_name=collection_name
         )
-        retriever = database.as_retriever(search_kwargs={"k": 5})
-        
+
         # GPU 정보 가져오기
         gpu_name = torch.cuda.get_device_name(0) if torch.cuda.is_available() else "사용 가능한 GPU 없음"
         
@@ -35,7 +34,7 @@ def load_database(persist_directory, collection_name, embeddings):
         
         # 성공 메시지
         st.success(f"✅ Chroma 데이터베이스가 성공적으로 로드되었습니다! 경로: {persist_directory}, 컬렉션: {collection_name}")
-        return retriever
+        return database
         
     except Exception as e:
         # 오류 메시지 출력
