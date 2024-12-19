@@ -57,6 +57,8 @@ env.bak/
 artworks/
 chat.py
 chroma_1205/
+chroma_1218/
+chroma_chat_db/
 
 artworks/
 *.txt

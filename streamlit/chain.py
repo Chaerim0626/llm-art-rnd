@@ -1,22 +1,23 @@
 import re
 import yaml
 from langchain.prompts import ChatPromptTemplate
-from langchain.schema.runnable import RunnablePassthrough
-
+from langchain.schema.runnable import RunnablePassthrough, RunnableMap
+from langchain.chains import ConversationChain
 
 class MarkdownOutputParser:
     """Enhanced Markdown parser with additional formatting options."""
 
     def __call__(self, llm_output):
-        """
-        모델 출력에서 <|assistant|> 이후의 텍스트를 추출하여 마크다운 형식으로 반환.
-        """
+        # <assistant> 이후의 텍스트만 추출
         match = re.search(r"<\|assistant\|>\s*(.*)", llm_output, re.DOTALL)
         if match:
             extracted_text = match.group(1).strip()
-            return f"### 모델 결과\n\n```markdown\n{extracted_text}\n```\n"
+            # 마크다운 코드 블록으로 출력 포맷
+            return f"\n{extracted_text}\n"
         else:
-            return f"### 모델 결과\n\n```markdown\n{llm_output.strip()}\n```\n"
+            # <assistant> 태그가 없는 경우 원래 출력 반환
+            return f"\n{llm_output.strip()}\n"
+
 
 
 def load_prompt_template(file_path):
@@ -29,20 +30,33 @@ def load_prompt_template(file_path):
     return ChatPromptTemplate.from_template(data['template'])
 
 
-def create_chain(retriever, prompt, llm):
+def create_chain(retriever, chat_retriever, prompt, llm, memory, input):
     """
-    체인을 구성.
-    - retriever: 데이터베이스 검색기
-    - prompt: 프롬프트 템플릿
-    - llm: 모델 객체
+    컨텍스트와 대화 이력을 결합해 모델 체인 구성.
+    - retriever: 작품 관련 문서 검색
+    - chat_retriever: 대화 이력 검색
     """
-    return (
-        {"context": retriever, "question": RunnablePassthrough()}  # 입력 데이터 처리
-        | prompt  # 프롬프트 생성
-        | llm  # 모델 응답 생성
-        | MarkdownOutputParser()  # 마크다운 형식으로 결과 포맷팅
-    )
+    def load_context_and_history(input):
+        # 작품 문서 검색
+        docs = retriever.invoke(input)
+        context = "\n".join([doc.page_content for doc in docs])
+        
+        # 대화 이력 검색
+        chat_docs = chat_retriever.invoke(input)
+        history = "\n".join([doc.page_content for doc in chat_docs])
 
+        return {"context": context, "history": history}
+
+    return (
+        RunnableMap({
+            "context": lambda input: load_context_and_history(input)["context"],
+            "history": lambda input: load_context_and_history(input)["history"],
+            "question": lambda input: input  # question을 명시적으로 입력받아 전달
+        })
+        | prompt  # 프롬프트에 context, history, question 전달
+        | llm  # LLM 실행
+        | MarkdownOutputParser()  # 출력 결과를 마크다운으로 포맷팅
+    )
 
 def extract_answer(text):
     """
@@ -55,23 +69,23 @@ def extract_answer(text):
     return "답변을 찾을 수 없습니다."
 
 
-def process_input(llm, retriever, prompt, user_input):
+def process_input(llm, retriever,chat_retriever, prompt, user_input, memory):
     """
-    입력된 질문과 문맥(Context)을 결합하여 모델에 전달.
+    체인을 사용해 입력된 질문과 문맥(Context)을 결합하고 모델을 실행.
     - llm: 모델 파이프라인 객체
     - retriever: 데이터베이스 검색 객체
     - prompt: ChatPromptTemplate 객체
     - user_input: 사용자 입력 질문
     """
-    # 문맥(Context) 생성
-    context = retriever.get_relevant_documents(user_input)
-    context_text = " ".join(doc.page_content for doc in context) if context else "관련된 정보가 없습니다."
+    # 체인 생성
+    chain = create_chain(retriever,chat_retriever, prompt, llm, memory, user_input)
     
-    # 프롬프트 생성
-    input_text_with_context = prompt.format(context=context_text, question=user_input)
+    # 체인 실행: 입력된 질문을 기반으로 결과 반환
+    result = chain.invoke(user_input)
     
-    # 모델 응답 생성
-    response = llm.pipeline(input_text_with_context)
-    
-    # 응답에서 <|assistant|> 이후 텍스트 추출
-    return extract_answer(response[0]['generated_text'])
+    # 결과를 반환
+    if result:
+        return result 
+    else:
+        return "결과를 생성할 수 없습니다."
+
