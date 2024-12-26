@@ -57,6 +57,7 @@ env.bak/
 artworks/
 chat.py
 chroma_1205/
+faiss_artworks/
 
 artworks/
 *.txt
