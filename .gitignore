@@ -58,8 +58,11 @@ artworks/
 chat.py
 chroma_1205/
 faiss_artworks/
+faiss_artworks_0113/
 
 artworks/
 *.txt
 *.pdf
 *.docx
+*.csv
+*.json
