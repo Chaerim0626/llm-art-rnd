@@ -57,10 +57,10 @@ env.bak/
 artworks/
 faiss_artworks_0114_docx/
 faiss_artworks_0114/
-
 artworks/
 *.txt
 *.pdf
 *.docx
 *.csv
 *.json
+chroma_1205
