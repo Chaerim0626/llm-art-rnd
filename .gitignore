@@ -55,10 +55,8 @@ env.bak/
 
 # Artworks directory to ignore
 artworks/
-chat.py
-chroma_1205/
-faiss_artworks/
-faiss_artworks_0113/
+faiss_artworks_0114_docx/
+faiss_artworks_0114/
 
 artworks/
 *.txt

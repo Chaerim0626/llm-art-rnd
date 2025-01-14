@@ -6,15 +6,33 @@ from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
 from langchain import HuggingFacePipeline
 from langchain.prompts import ChatPromptTemplate
 from langchain.schema.runnable import RunnablePassthrough, RunnableMap
-import re
-import uuid
-import time
+import uuid, time, os, re
+from collections import OrderedDict
+
+# 세션 ID 파일 경로 설정
+SESSION_ID_FILE = "session_id.txt"
+
+# 세션 ID 불러오기 또는 생성하기
+def get_or_create_session_id():
+    if os.path.exists(SESSION_ID_FILE):
+        with open(SESSION_ID_FILE, "r") as f:
+            session_id = f.read().strip()
+            if session_id:
+                return session_id
+    # 파일이 없거나 내용이 비어있으면 새로 생성
+    session_id = str(uuid.uuid4())
+    with open(SESSION_ID_FILE, "w") as f:
+        f.write(session_id)
+    return session_id
+
 
 # 세션 관리용 In-Memory Store
 if "messages" not in st.session_state:
-    st.session_state["messages"] = {}
+    st.session_state["messages"] = OrderedDict()
+
+# 세션 ID 설정
 if "session_id" not in st.session_state:
-    st.session_state["session_id"] = str(uuid.uuid4())
+    st.session_state["session_id"] = get_or_create_session_id()
 
 # Streamlit 페이지 설정
 st.set_page_config(page_title="Artwork Chatbot", layout="wide")
@@ -78,6 +96,9 @@ def load_prompt_template():
     - Incorporate emojis (e.g., 🎨, 🖼️, 🖌️) where relevant to make the response engaging and visually appealing.
     - Structure your answers in a **clear and logical format** to make the response easy to read and understand.
     
+    <|chat_history|>
+    {chat_history}
+
     <|context|>
     {context}
 
@@ -116,7 +137,7 @@ def generate_chat_history():
     return "\n".join(chat_history)
 
 # FAISS 데이터베이스 설정
-faiss_path = "./faiss_artworks"
+faiss_path = "./faiss_artworks_0114"
 embedding_model = SentenceTransformer("nlpai-lab/KURE-v1")
 with st.spinner("Loading FAISS database..."):
     faiss_db = FAISS.load_local(
@@ -134,10 +155,10 @@ prompt = load_prompt_template()
 
 retriever = faiss_db.as_retriever(
     search_kwargs={
-        "k": 3,
-        "fetch_k": 10,
+        "k": 5,
+        "fetch_k": 15,
         "mmr": True,
-        "mmr_beta": 0.5
+        "mmr_beta": 0.8
     }
 )
 
