@@ -90,14 +90,7 @@ def load_prompt_template():
     If the requested information is not found in the document, respond with "The document does not contain this information." 
     Provide detailed and comprehensive answers, always include the artwork number, and ensure all answers are written in Korean. 
     All answers should be formatted using beautiful Markdown syntax to make the response visually appealing and easy to read. 
-
-    When answering:
-    - Use a variety of Markdown elements to structure your response, such as:
-    - Incorporate emojis (e.g., 🎨, 🖼️, 🖌️) where relevant to make the response engaging and visually appealing.
-    - Structure your answers in a **clear and logical format** to make the response easy to read and understand.
-    
-    <|chat_history|>
-    {chat_history}
+    Use headings, bullet points, and bold or italic text where appropriate to enrich the response.
 
     <|context|>
     {context}
@@ -107,6 +100,7 @@ def load_prompt_template():
 
     <|assistant|>
     '''
+
     return ChatPromptTemplate.from_template(template)
 
 
