@@ -64,3 +64,6 @@ artworks/
 *.csv
 *.json
 chroma_1205
+*.vec
+*.kv
+*.npy
