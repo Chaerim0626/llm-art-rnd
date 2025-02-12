@@ -41,17 +41,17 @@ st.title('🤖 미술작품 QA 챗봇')
 
 session_id = st.session_state["session_id"]
 
-# 디버깅: 현재 세션 상태 출력
-st.write("[DEBUG] Current session_state:")
-st.write(st.session_state)
+# # 디버깅: 현재 세션 상태 출력
+# st.write("[DEBUG] Current session_state:")
+# st.write(st.session_state)
 
 # 이전 대화 내용 표시
-st.subheader("대화 기록")
-for message_id, message_data in st.session_state["messages"].items():
-    if message_data["type"] == "user":
-        st.write(f"**사용자 ({message_id}):** {message_data['content']}")
-    elif message_data["type"] == "ai":
-        st.write(f"**AI ({message_id}):** {message_data['content']}")
+# st.subheader("대화 기록")
+# for message_id, message_data in st.session_state["messages"].items():
+#     if message_data["type"] == "user":
+#         st.write(f"**사용자 ({message_id}):** {message_data['content']}")
+#     elif message_data["type"] == "ai":
+#         st.write(f"**AI ({message_id}):** {message_data['content']}")
 
 @st.cache_resource
 # EXAONE 모델 설정
@@ -85,12 +85,15 @@ def load_pipeline(model_id):
 def load_prompt_template():
     template = '''
     <|system|>
-    You are a friendly chatbot specializing in artworks. 
-    Answer questions strictly based on the information provided in the document (context). 
-    If the requested information is not found in the document, respond with "The document does not contain this information." 
-    Provide detailed and comprehensive answers, always include the artwork number, and ensure all answers are written in Korean. 
-    All answers should be formatted using beautiful Markdown syntax to make the response visually appealing and easy to read. 
-    Use headings, bullet points, and bold or italic text where appropriate to enrich the response.
+    You are a friendly chatbot specializing in artworks and general conversations.
+    Your primary role is to answer questions strictly based on the information provided in the document (context). 
+    If the requested information is not found in the document, respond with:
+    "The document does not contain this information." in Korean.
+
+    However, if the question is a general conversation or does not relate to the document, you should respond naturally as a conversational chatbot. 
+    You can talk about art history, artists, exhibitions, and general topics such as daily life, technology, and culture. 
+    Maintain a friendly and engaging tone, ensuring all responses are written in **Korean**.
+    Always use **beautiful Markdown formatting** (headings, bullet points, bold or italic text) to enhance readability.
 
     <|context|>
     {context}
@@ -149,10 +152,10 @@ prompt = load_prompt_template()
 
 retriever = faiss_db.as_retriever(
     search_kwargs={
-        "k": 5,
-        "fetch_k": 15,
-        "mmr": True,
-        "mmr_beta": 0.8
+        "k": 5,                # 검색 결과 개수
+        "fetch_k": 20,         # 더 많은 결과 가져오기
+        "mmr": True,           # MMR 활성화
+        "mmr_beta": 0.8      # 다양성과 관련성 간 균형
     }
 )
 
@@ -194,7 +197,6 @@ if submitted:
         st.markdown("---")
         st.markdown("### 현재 대화")
         st.markdown(f"**질문:** {user_input}")
-        st.markdown(f"**답변:**\n\n")
         st.markdown(response_text, unsafe_allow_html=False)
         print(response_text)
         # 응답 시간 출력
