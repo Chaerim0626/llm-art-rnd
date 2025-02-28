@@ -67,3 +67,5 @@ chroma_1205
 *.vec
 *.kv
 *.npy
+*.jpg
+dataset/

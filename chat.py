@@ -9,49 +9,10 @@ from langchain.schema.runnable import RunnablePassthrough, RunnableMap
 import uuid, time, os, re
 from collections import OrderedDict
 
-# 세션 ID 파일 경로 설정
-SESSION_ID_FILE = "session_id.txt"
-
-# 세션 ID 불러오기 또는 생성하기
-def get_or_create_session_id():
-    if os.path.exists(SESSION_ID_FILE):
-        with open(SESSION_ID_FILE, "r") as f:
-            session_id = f.read().strip()
-            if session_id:
-                return session_id
-    # 파일이 없거나 내용이 비어있으면 새로 생성
-    session_id = str(uuid.uuid4())
-    with open(SESSION_ID_FILE, "w") as f:
-        f.write(session_id)
-    return session_id
-
-
-# 세션 관리용 In-Memory Store
-if "messages" not in st.session_state:
-    st.session_state["messages"] = OrderedDict()
-
-# 세션 ID 설정
-if "session_id" not in st.session_state:
-    st.session_state["session_id"] = get_or_create_session_id()
 
 # Streamlit 페이지 설정
 st.set_page_config(page_title="Artwork Chatbot", layout="wide")
 st.title('🤖 미술작품 QA 챗봇')
-
-
-session_id = st.session_state["session_id"]
-
-# # 디버깅: 현재 세션 상태 출력
-# st.write("[DEBUG] Current session_state:")
-# st.write(st.session_state)
-
-# 이전 대화 내용 표시
-# st.subheader("대화 기록")
-# for message_id, message_data in st.session_state["messages"].items():
-#     if message_data["type"] == "user":
-#         st.write(f"**사용자 ({message_id}):** {message_data['content']}")
-#     elif message_data["type"] == "ai":
-#         st.write(f"**AI ({message_id}):** {message_data['content']}")
 
 @st.cache_resource
 # EXAONE 모델 설정
@@ -107,8 +68,6 @@ def load_prompt_template():
     return ChatPromptTemplate.from_template(template)
 
 
-
-
 # 응답 텍스트에서 답변 추출
 def extract_answer(text):
     match = re.search(r"<\|assistant\|>\s*(.*)", text, re.DOTALL)
@@ -121,8 +80,6 @@ def extract_answer(text):
         return f"### 모델 결과\n\n{text.strip()}\n"
 
 
-
-
 # 대화 기록 생성
 def generate_chat_history():
     chat_history = []
@@ -132,6 +89,7 @@ def generate_chat_history():
         elif message_data["type"] == "ai":
             chat_history.append(f"AI: {message_data['content']}")
     return "\n".join(chat_history)
+
 
 # FAISS 데이터베이스 설정
 faiss_path = "./faiss_artworks_0114"
@@ -145,6 +103,7 @@ with st.spinner("Loading FAISS database..."):
     st.success("FAISS database loaded successfully!")
 
 faiss_db.embedding_function = lambda text: embedding_model.encode(text)
+
 
 # LLM 및 프롬프트 초기화
 llm = load_pipeline("LGAI-EXAONE/EXAONE-3.5-7.8B-Instruct")
