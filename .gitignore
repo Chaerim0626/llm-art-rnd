@@ -69,3 +69,11 @@ chroma_1205
 *.npy
 *.jpg
 dataset/
+pdf/
+dataset_csv
+pdf2/
+집에가고싶DB/
+faiss_artworks_0324_json/
+faiss_artworks_0324_pdf/
+faiss_artworks_0324_pdf2/
+faiss_artworks_merged_0324/
